@@ -8,24 +8,40 @@ use App\Models\Autor;
 
 class LivroController extends Controller
 {
-    public function index()
+    public function apiIndex()
     {
-        $livros = Livro::all();
-        return view('livros.index', compact('livros'));
+        return Livro::all();
     }
 
-    public function create()
+    public function apiStore(Request $request)
     {
-        $autores = Autor::all();
-        return view('livros.create', compact('autores'));
+        $validated = $request->validate([
+            'titulo' => 'required|max:255',
+            'ano_publicacao' => 'required|integer',
+            'autor_id' => 'required|exists:autors,id',
+        ]);
+
+        $livro = Livro::create($validated);
+        return response()->json($livro, 201);
     }
 
-    public function store(Request $request)
+    public function apiUpdate(Request $request, $id)
     {
-        $livro = Livro::create($request->all());
-        return redirect()->route('livros.index');
+        $validated = $request->validate([
+            'titulo' => 'required|max:255',
+            'ano_publicacao' => 'required|integer',
+            'autor_id' => 'required|exists:autors,id',
+        ]);
+
+        $livro = Livro::findOrFail($id);
+        $livro->update($validated);
+        return response()->json($livro, 200);
     }
 
-    // Os outros métodos do controlador de recursos podem ser deixados em branco.
-    //...
+    public function apiDestroy($id)
+    {
+        $livro = Livro::findOrFail($id);
+        $livro->delete();
+        return response()->json(null, 204);
+    }
 }

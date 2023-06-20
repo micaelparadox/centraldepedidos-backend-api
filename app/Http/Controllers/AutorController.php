@@ -7,23 +7,40 @@ use App\Models\Autor;
 
 class AutorController extends Controller
 {
-    public function index()
+    public function apiIndex()
     {
-        $autores = Autor::all();
-        return view('autores.index', compact('autores'));
+        return Autor::all();
     }
 
-    public function create()
+    public function apiStore(Request $request)
     {
-        return view('autores.create');
+        $validated = $request->validate([
+            'nome' => 'required|max:255',
+            'data_nascimento' => 'required|date',
+            'nacionalidade' => 'required|max:255',
+        ]);
+
+        $autor = Autor::create($validated);
+        return response()->json($autor, 201);
     }
 
-    public function store(Request $request)
+    public function apiUpdate(Request $request, $id)
     {
-        $autor = Autor::create($request->all());
-        return redirect()->route('autores.index');
+        $validated = $request->validate([
+            'nome' => 'required|max:255',
+            'data_nascimento' => 'required|date',
+            'nacionalidade' => 'required|max:255',
+        ]);
+
+        $autor = Autor::findOrFail($id);
+        $autor->update($validated);
+        return response()->json($autor, 200);
     }
 
-    // Os outros métodos do controlador de recursos podem ser deixados em branco.
-    //...
+    public function apiDestroy($id)
+    {
+        $autor = Autor::findOrFail($id);
+        $autor->delete();
+        return response()->json(null, 204);
+    }
 }
