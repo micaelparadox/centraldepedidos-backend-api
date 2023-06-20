@@ -4,13 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Livro;
-use App\Models\Autor;
 
 class LivroController extends Controller
 {
     public function apiIndex()
     {
-        return Livro::all();
+        $livros = Livro::all();
+
+        return response()->json($livros, 200);
+    }
+
+    public function apiShow($id)
+    {
+        $livro = Livro::find($id);
+
+        if (!$livro) {
+            return response()->json(['error' => 'Livro não encontrado'], 404);
+        }
+
+        return response()->json($livro, 200);
     }
 
     public function apiStore(Request $request)
@@ -22,7 +34,8 @@ class LivroController extends Controller
         ]);
 
         $livro = Livro::create($validated);
-        return response()->json($livro, 201);
+
+        return response()->json(['message' => 'Livro criado com sucesso', 'livro' => $livro], 201);
     }
 
     public function apiUpdate(Request $request, $id)
@@ -33,15 +46,27 @@ class LivroController extends Controller
             'autor_id' => 'required|exists:autors,id',
         ]);
 
-        $livro = Livro::findOrFail($id);
+        $livro = Livro::find($id);
+
+        if (!$livro) {
+            return response()->json(['error' => 'Livro não encontrado'], 404);
+        }
+
         $livro->update($validated);
-        return response()->json($livro, 200);
+
+        return response()->json(['message' => 'Livro atualizado com sucesso', 'livro' => $livro], 200);
     }
 
     public function apiDestroy($id)
     {
-        $livro = Livro::findOrFail($id);
+        $livro = Livro::find($id);
+
+        if (!$livro) {
+            return response()->json(['error' => 'Livro não encontrado'], 404);
+        }
+
         $livro->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Livro deletado com sucesso'], 200);
     }
 }

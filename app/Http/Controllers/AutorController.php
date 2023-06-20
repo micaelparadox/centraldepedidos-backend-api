@@ -9,7 +9,20 @@ class AutorController extends Controller
 {
     public function apiIndex()
     {
-        return Autor::all();
+        $autores = Autor::all();
+
+        return response()->json($autores, 200);
+    }
+
+    public function apiShow($id)
+    {
+        $autor = Autor::find($id);
+
+        if (!$autor) {
+            return response()->json(['error' => 'Autor não encontrado'], 404);
+        }
+
+        return response()->json($autor, 200);
     }
 
     public function apiStore(Request $request)
@@ -21,7 +34,8 @@ class AutorController extends Controller
         ]);
 
         $autor = Autor::create($validated);
-        return response()->json($autor, 201);
+
+        return response()->json(['message' => 'Autor criado com sucesso', 'autor' => $autor], 201);
     }
 
     public function apiUpdate(Request $request, $id)
@@ -32,15 +46,27 @@ class AutorController extends Controller
             'nacionalidade' => 'required|max:255',
         ]);
 
-        $autor = Autor::findOrFail($id);
+        $autor = Autor::find($id);
+
+        if (!$autor) {
+            return response()->json(['error' => 'Autor não encontrado'], 404);
+        }
+
         $autor->update($validated);
-        return response()->json($autor, 200);
+
+        return response()->json(['message' => 'Autor atualizado com sucesso', 'autor' => $autor], 200);
     }
 
     public function apiDestroy($id)
     {
-        $autor = Autor::findOrFail($id);
+        $autor = Autor::find($id);
+
+        if (!$autor) {
+            return response()->json(['error' => 'Autor não encontrado'], 404);
+        }
+
         $autor->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Autor deletado com sucesso'], 200);
     }
 }
